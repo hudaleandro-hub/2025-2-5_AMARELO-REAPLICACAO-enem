@@ -1,5 +1,5 @@
 """
-Propósito: remover as bordas externas das páginas
+Propósito: remover as bordas externas das páginas (distinguindo pares e ímpares)
 Autor: Alexandre Nassar de Peder
 Criação: 02/10/2025
 Atualização: 03/06/2026
@@ -8,7 +8,7 @@ OBS1: puxe a pasta "imagens-convertidas" do passo 1 para essa pasta do passo 2
 
 OBS2: abra a imagem no GIMP e conte pixels para saber quanto de borda tem que cortar.
 
-OBS3: atualize a linha 33 com os valores corretos de corte (esquerda, superior, direita, inferior)
+OBS3: valores de corte ajustados para diferenciar páginas pares e ímpares.
 
 OBS4: tenha em mente desde já que você vai usar as imagens futuramente, então corte pensando na melhor maneira para executar todos os 12 passos
 
@@ -17,6 +17,7 @@ OBS5: execute o código, e abra as imagens para conferir se as bordas foram remo
 
 from PIL import Image
 import os
+import re
 
 pasta_imagens = "imagens-convertidas"
 pasta_saida = "sem-bordas-externas"
@@ -30,7 +31,22 @@ for nome_arquivo in os.listdir(pasta_imagens):
 
         largura, altura = imagem.size
 
-        caixa_corte = (238, 469, largura - 269, altura - 290) # ATUALIZE AQUI OS VALORES DE CORTE (esquerda, superior, direita, inferior)
+        # Extrai os dígitos numéricos do nome do arquivo (ex: "pagina_enem_10.png" -> 10)
+        numeros = re.findall(r'\d+', nome_arquivo)
+        if numeros:
+            numero_pagina = int(numeros[-1])
+            
+            # Verifica se a página é par ou ímpar
+            if numero_pagina % 2 == 0:
+                # Páginas pares
+                caixa_corte = (272, 442, largura - 240, altura - 290)
+            else:
+                # Páginas ímpares
+                caixa_corte = (242, 442, largura - 270, altura - 290)
+        else:
+            # Fallback caso não encontre número no nome do arquivo
+            caixa_corte = (272, 442, largura - 240, altura - 290)
+
         imagem_cortada = imagem.crop(caixa_corte)
 
         caminho_saida = os.path.join(pasta_saida, nome_arquivo)
